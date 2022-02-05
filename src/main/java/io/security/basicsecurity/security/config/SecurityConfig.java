@@ -1,14 +1,16 @@
 package io.security.basicsecurity.security.config;
 
-import io.security.basicsecurity.security.handler.CustomAuthenticationFailureHandler;
-import io.security.basicsecurity.security.handler.CustomAuthenticationSuccessHandler;
-import io.security.basicsecurity.security.provider.CustomAuthenticationProvider;
-import lombok.extern.slf4j.Slf4j;
+import io.security.basicsecurity.security.common.FormAuthenticationDetailsSource;
+import io.security.basicsecurity.security.handler.FormAccessDeniedHandler;
+import io.security.basicsecurity.security.handler.FormAuthenticationFailureHandler;
+import io.security.basicsecurity.security.handler.FormAuthenticationSuccessHandler;
+import io.security.basicsecurity.security.provider.FormAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,15 +19,18 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
-@Slf4j
+@Order(1)
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-    @Autowired private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-    @Autowired private AuthenticationDetailsSource authenticationDetailsSource;
+    @Autowired private FormAuthenticationFailureHandler customAuthenticationFailureHandler;
+    @Autowired private FormAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+//    @Autowired private AuthenticationDetailsSource authenticationDetailsSource;
+    @Autowired private FormAuthenticationDetailsSource authenticationDetailsSource;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,7 +45,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        return new CustomAuthenticationProvider(passwordEncoder());
+        return new FormAuthenticationProvider(passwordEncoder());
+    }
+
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Override
@@ -60,7 +70,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .successHandler(customAuthenticationSuccessHandler)
                 .failureHandler(customAuthenticationFailureHandler)
-                .permitAll();
+                .permitAll()
+        .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                .accessDeniedPage("/denied")
+                .accessDeniedHandler(accessDeniedHandler());
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        final FormAccessDeniedHandler accessDeniedHandler = new FormAccessDeniedHandler();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
     }
 
     // static WebIgnore

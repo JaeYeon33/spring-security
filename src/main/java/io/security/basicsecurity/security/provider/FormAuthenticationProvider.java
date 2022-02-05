@@ -15,12 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-public class CustomAuthenticationProvider implements AuthenticationProvider {
+public class FormAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired private UserDetailsService userDetailsService;
     @Autowired private PasswordEncoder passwordEncoder;
 
-    public CustomAuthenticationProvider(PasswordEncoder passwordEncoder) {
+    public FormAuthenticationProvider(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 

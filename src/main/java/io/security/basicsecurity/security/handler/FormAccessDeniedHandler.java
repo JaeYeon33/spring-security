@@ -1,6 +1,5 @@
 package io.security.basicsecurity.security.handler;
 
-import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -13,7 +12,7 @@ import java.io.IOException;
 
 @Setter
 @Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class FormAccessDeniedHandler implements AccessDeniedHandler {
 
     private String errorPage;
 
