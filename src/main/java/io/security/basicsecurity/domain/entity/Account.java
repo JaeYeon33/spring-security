@@ -1,17 +1,18 @@
-package io.security.basicsecurity.domain;
+package io.security.basicsecurity.domain.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"userRoles"})
 @EqualsAndHashCode(of = "id")
 public class Account implements Serializable {
 
@@ -20,6 +21,8 @@ public class Account implements Serializable {
     private String username;
     private String password;
     private String email;
-    private String age;
-    private String role;
+    private int age;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Role> userRoles = new HashSet<>();
 }
